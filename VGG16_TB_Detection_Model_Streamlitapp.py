@@ -1,3 +1,5 @@
+import gdown
+import os
 import streamlit as st
 from PIL import Image
 import numpy as np
@@ -22,10 +24,18 @@ if uploaded_file is not None:
     # Display uploaded image
     st.image(uploaded_file, caption="Uploaded Chest X-ray", use_column_width=True)
     
-    # Load the model (from Google Drive or any hosted link)
+    # Load the model (downloaded from Google Drive using gdown)
     @st.cache(allow_output_mutation=True)
     def load_model():
-        model = tf.keras.models.load_model('https://drive.google.com/file/d/1m3HKwnDeFi72hqiAy0U2XufiuzAonirY/view?usp=drive_link')  # Actual link
+        model_path = 'vgg16_final_model.keras'
+        
+        # Download the model from Google Drive if not already downloaded
+        if not os.path.exists(model_path):
+            url = 'https://drive.google.com/uc?id=1m3HKwnDeFi72hqiAy0U2XufiuzAonirY'  # Direct download link
+            output = model_path
+            gdown.download(url, output, quiet=False)
+        
+        model = tf.keras.models.load_model(model_path)
         return model
     
     model = load_model()
@@ -52,11 +62,12 @@ if uploaded_file is not None:
         else:
             st.success("The image indicates no signs of tuberculosis.")
         
-        # Confidence and probability
-        probability = prediction[0][0]
-        confidence = probability if probability > 0.5 else (1 - probability)
+        # Confidence
+        confidence = prediction[0][0] if prediction[0][0] > 0.5 else (1 - prediction[0][0])
         st.write(f"Model confidence: {confidence * 100:.2f}%")
-        st.write(f"Prediction Probability: **{probability:.2f}** (TB Positive likelihood)")
+        
+        # Show prediction probabilities
+        st.write(f"Prediction probabilities: TB Positive: {prediction[0][0] * 100:.2f}%, Normal: {(1 - prediction[0][0]) * 100:.2f}%")
 
 # Footer with additional resources
 st.sidebar.title("Additional Resources")
