@@ -23,7 +23,7 @@ if uploaded_file is not None:
     st.image(uploaded_file, caption="Uploaded Chest X-ray", use_column_width=True)
     
     # Load the model (from Google Drive or any hosted link)
-    @st.cache_resource(allow_output_mutation=True)
+    @st.cache(allow_output_mutation=True)
     def load_model():
         model = tf.keras.models.load_model('https://drive.google.com/file/d/1m3HKwnDeFi72hqiAy0U2XufiuzAonirY/view?usp=drive_link')  # Actual link
         return model
@@ -52,14 +52,16 @@ if uploaded_file is not None:
         else:
             st.success("The image indicates no signs of tuberculosis.")
         
-        # Confidence
-        confidence = prediction[0][0] if prediction[0][0] > 0.5 else (1 - prediction[0][0])
+        # Confidence and probability
+        probability = prediction[0][0]
+        confidence = probability if probability > 0.5 else (1 - probability)
         st.write(f"Model confidence: {confidence * 100:.2f}%")
+        st.write(f"Prediction Probability: **{probability:.2f}** (TB Positive likelihood)")
 
 # Footer with additional resources
 st.sidebar.title("Additional Resources")
 st.sidebar.markdown("""
 - [World Health Organization](https://www.who.int/health-topics/tuberculosis)
 - [CDC: Tuberculosis Information](https://www.cdc.gov/tb/default.htm)
-- [GitHub Repo](https://github.com/your-repo-link)  
+- [GitHub Repo](https://github.com/CMH28-ML/TB_Detection_VGG16/edit/main/VGG16_TB_Detection_Model_Streamlitapp.py)  
 """)
