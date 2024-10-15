@@ -1,20 +1,96 @@
 import gdown
 import os
+import gdown
+import os
 import streamlit as st
 from PIL import Image
 import numpy as np
 import tensorflow as tf
+import base64
 
-# Title and description
+# Function to convert image to base64 for embedding in HTML
+def get_image_base64(image):
+    with open(image, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
+
+# Set custom CSS styles for the app
+st.markdown(
+    """
+    <style>
+    /* Main content styles */
+    .main {
+        background-color: #e0f7fa;
+        color: #006064;
+    }
+
+    /* Title styling */
+    h1 {
+        color: #004d40;
+        font-family: 'Arial Black', sans-serif;
+        font-size: 40px;
+    }
+
+    /* Subheader and text styling */
+    .stText {
+        font-family: 'Arial', sans-serif;
+        color: #004d40;
+    }
+    
+    /* Prediction result styling */
+    .stSubheader {
+        font-family: 'Arial Black', sans-serif;
+        font-size: 28px;
+        color: #004d40;
+    }
+
+    /* Sidebar styling */
+    .sidebar .sidebar-content {
+        background-color: #004d40;
+        color: white;
+        font-family: 'Arial';
+    }
+    
+    /* Footer styles for the bottom bar */
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #004d40;
+        color: white;
+        text-align: center;
+        font-family: 'Arial Black';
+        font-size: 24px;
+        padding: 10px;
+    }
+
+    /* Bubble image styling */
+    .bubble-img {
+        border-radius: 50%;
+        margin-right: 15px;
+        float: left;
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
+
+# Title
 st.title("PulmoScan AI: Tuberculosis Detection")
-st.write("PulmoScan AI uses advanced deep learning techniques to detect whether a chest X-ray shows signs of tuberculosis.")
 
-# Sidebar for additional info
-st.sidebar.title("About PulmoScan AI")
-st.sidebar.info("""
-PulmoScan AI is an AI-based tool designed to assist in the detection of tuberculosis from chest X-rays. 
-This tool is built using a VGG16 model and streamlines the process of diagnosis.
-""")
+# Upload the image for the bubble from local machine
+uploaded_picture = st.file_uploader("Choose a picture from your machine for display in the bubble", type=["png", "jpg", "jpeg"])
+
+# If a picture is uploaded, convert it to base64 and display in a bubble
+if uploaded_picture is not None:
+    image_base64 = get_image_base64(uploaded_picture)
+    st.write(
+        f"""
+        <img class='bubble-img' src='data:image/png;base64,{image_base64}' width='100' height='100'/>
+        PulmoScan AI uses advanced deep learning techniques to detect whether a chest X-ray shows signs of tuberculosis.
+        """, unsafe_allow_html=True
+    )
+else:
+    st.write("PulmoScan AI uses advanced deep learning techniques to detect whether a chest X-ray shows signs of tuberculosis.")
 
 # Upload image section
 st.header("Upload a Chest X-ray Image")
@@ -68,6 +144,22 @@ if uploaded_file is not None:
         
         # Show prediction probabilities
         st.write(f"Prediction probabilities: TB Positive: {prediction[0][0] * 100:.2f}%, Normal: {(1 - prediction[0][0]) * 100:.2f}%")
+
+# Sidebar at the bottom with additional info and motivation
+st.markdown(
+    """
+    <div class='footer'>
+    We beat TB! PulmoScan AI is here to help.
+    </div>
+    """, unsafe_allow_html=True
+)
+
+# Sidebar for additional info
+st.sidebar.title("About PulmoScan AI")
+st.sidebar.info("""
+PulmoScan AI is an AI-based tool designed by Chidochashe Monalisa Hodzi to assist in the detection of tuberculosis from chest X-rays. 
+This tool is built using a VGG16 model and streamlines the process of diagnosis.
+""")
 
 # Footer with additional resources
 st.sidebar.title("Additional Resources")
