@@ -1,17 +1,9 @@
 import gdown
 import os
-import gdown
-import os
 import streamlit as st
 from PIL import Image
 import numpy as np
 import tensorflow as tf
-import base64
-
-# Function to convert image to base64 for embedding in HTML
-def get_image_base64(image):
-    with open(image, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode("utf-8")
 
 # Set custom CSS styles for the app
 st.markdown(
@@ -28,28 +20,33 @@ st.markdown(
         color: #004d40;
         font-family: 'Arial Black', sans-serif;
         font-size: 40px;
+        margin-bottom: 10px;
     }
 
-    /* Subheader and text styling */
+    /* Subheader and general text styling */
     .stText {
-        font-family: 'Arial', sans-serif;
+        font-family: 'Verdana', sans-serif;
         color: #004d40;
+        font-size: 18px;
     }
-    
-    /* Prediction result styling */
+
     .stSubheader {
         font-family: 'Arial Black', sans-serif;
         font-size: 28px;
         color: #004d40;
+        margin-top: 15px;
+        margin-bottom: 10px;
     }
 
-    /* Sidebar styling */
+    /* Sidebar styling (dark blue) */
     .sidebar .sidebar-content {
-        background-color: #004d40;
+        background-color: #1a237e;
         color: white;
-        font-family: 'Arial';
+        font-family: 'Verdana';
+        font-size: 16px;
+        padding: 15px;
     }
-    
+
     /* Footer styles for the bottom bar */
     .footer {
         position: fixed;
@@ -63,13 +60,6 @@ st.markdown(
         font-size: 24px;
         padding: 10px;
     }
-
-    /* Bubble image styling */
-    .bubble-img {
-        border-radius: 50%;
-        margin-right: 15px;
-        float: left;
-    }
     </style>
     """, unsafe_allow_html=True
 )
@@ -77,20 +67,12 @@ st.markdown(
 # Title
 st.title("PulmoScan AI: Tuberculosis Detection")
 
-# Upload the image for the bubble from local machine
-uploaded_picture = st.file_uploader("Choose a picture from your machine for display in the bubble", type=["png", "jpg", "jpeg"])
-
-# If a picture is uploaded, convert it to base64 and display in a bubble
-if uploaded_picture is not None:
-    image_base64 = get_image_base64(uploaded_picture)
-    st.write(
-        f"""
-        <img class='bubble-img' src='data:image/png;base64,{image_base64}' width='100' height='100'/>
-        PulmoScan AI uses advanced deep learning techniques to detect whether a chest X-ray shows signs of tuberculosis.
-        """, unsafe_allow_html=True
-    )
-else:
-    st.write("PulmoScan AI uses advanced deep learning techniques to detect whether a chest X-ray shows signs of tuberculosis.")
+# Brief description below title
+st.write(
+    """
+    PulmoScan AI uses advanced deep learning techniques to detect whether a chest X-ray shows signs of tuberculosis.
+    """, unsafe_allow_html=True
+)
 
 # Upload image section
 st.header("Upload a Chest X-ray Image")
@@ -145,15 +127,6 @@ if uploaded_file is not None:
         # Show prediction probabilities
         st.write(f"Prediction probabilities: TB Positive: {prediction[0][0] * 100:.2f}%, Normal: {(1 - prediction[0][0]) * 100:.2f}%")
 
-# Sidebar at the bottom with additional info and motivation
-st.markdown(
-    """
-    <div class='footer'>
-    We beat TB! PulmoScan AI is here to help.
-    </div>
-    """, unsafe_allow_html=True
-)
-
 # Sidebar for additional info
 st.sidebar.title("About PulmoScan AI")
 st.sidebar.info("""
@@ -168,3 +141,12 @@ st.sidebar.markdown("""
 - [CDC: Tuberculosis Information](https://www.cdc.gov/tb/default.htm)
 - [GitHub Repo](https://github.com/CMH28-ML/TB_Detection_VGG16/edit/main/VGG16_TB_Detection_Model_Streamlitapp.py)  
 """)
+
+# Footer at the bottom with motivational phrase
+st.markdown(
+    """
+    <div class='footer'>
+    We beat TB! PulmoScan AI is here to help.
+    </div>
+    """, unsafe_allow_html=True
+)
