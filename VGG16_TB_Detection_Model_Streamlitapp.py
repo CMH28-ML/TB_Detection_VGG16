@@ -76,7 +76,7 @@ st.write(
 
 # Upload image section
 st.header("Upload a Chest X-ray Image")
-uploaded_file = st.file_uploader("Choose a chest X-ray image (JPEG/JPG/PNG)", type=["jpeg", "jpg", "png"])
+uploaded_file = st.file_uploader("Choose a chest X-ray image (JPEG/PNG)", type=["jpeg", "jpg", "png"])
 
 if uploaded_file is not None:
     # Check file size (Streamlit file uploader returns a BytesIO object)
