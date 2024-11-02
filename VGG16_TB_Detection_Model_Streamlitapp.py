@@ -76,56 +76,60 @@ st.write(
 
 # Upload image section
 st.header("Upload a Chest X-ray Image")
-uploaded_file = st.file_uploader("Choose a chest X-ray image (JPEG/PNG)", type=["jpeg", "jpg", "png"])
+uploaded_file = st.file_uploader("Choose a chest X-ray image (JPEG/JPG/PNG)", type=["jpeg", "jpg", "png"])
 
 if uploaded_file is not None:
-    # Display uploaded image
-    st.image(uploaded_file, caption="Uploaded Chest X-ray", use_column_width=True)
-    
-    # Load the model (downloaded from Google Drive using gdown)
-    @st.cache(allow_output_mutation=True)
-    def load_model():
-        model_path = 'vgg16_final_model.keras'
+    # Check file size (Streamlit file uploader returns a BytesIO object)
+    if uploaded_file.size > 10 * 1024 * 1024:  # 10 MB limit
+        st.error("The file is too large. Please upload a file smaller than 10 MB.")
+    else:
+        # Display uploaded image
+        st.image(uploaded_file, caption="Uploaded Chest X-ray", use_column_width=True)
         
-        # Download the model from Google Drive if not already downloaded
-        if not os.path.exists(model_path):
-            url = 'https://drive.google.com/uc?id=1m3HKwnDeFi72hqiAy0U2XufiuzAonirY'  # Direct download link
-            output = model_path
-            gdown.download(url, output, quiet=False)
+        # Load the model (downloaded from Google Drive using gdown)
+        @st.cache(allow_output_mutation=True)
+        def load_model():
+            model_path = 'vgg16_final_model.keras'
+            
+            # Download the model from Google Drive if not already downloaded
+            if not os.path.exists(model_path):
+                url = 'https://drive.google.com/uc?id=1m3HKwnDeFi72hqiAy0U2XufiuzAonirY'  # Direct download link
+                output = model_path
+                gdown.download(url, output, quiet=False)
+            
+            model = tf.keras.models.load_model(model_path)
+            return model
         
-        model = tf.keras.models.load_model(model_path)
-        return model
-    
-    model = load_model()
+        model = load_model()
 
-    # Preprocess image for prediction
-    def preprocess_image(image):
-        img = Image.open(image).convert('RGB')
-        img = img.resize((150, 150))
-        img_array = np.array(img) / 255.0
-        img_array = np.expand_dims(img_array, axis=0)
-        return img_array
+        # Preprocess image for prediction
+        def preprocess_image(image):
+            img = Image.open(image).convert('RGB')
+            img = img.resize((150, 150))
+            img_array = np.array(img) / 255.0
+            img_array = np.expand_dims(img_array, axis=0)
+            return img_array
 
-    processed_image = preprocess_image(uploaded_file)
-    
-    # Prediction button
-    if st.button("Predict"):
-        prediction = model.predict(processed_image)
-        result = "TB Positive" if prediction[0][0] > 0.5 else "Normal"
-        st.subheader(f"Prediction: {result}")
+        processed_image = preprocess_image(uploaded_file)
         
-        # Additional information
-        if result == "TB Positive":
-            st.error("The image indicates a high probability of tuberculosis. Please consult a doctor.")
-        else:
-            st.success("The image indicates no signs of tuberculosis.")
-        
-        # Confidence
-        confidence = prediction[0][0] if prediction[0][0] > 0.5 else (1 - prediction[0][0])
-        st.write(f"Model confidence: {confidence * 100:.2f}%")
-        
-        # Show prediction probabilities
-        st.write(f"Prediction probabilities: TB Positive: {prediction[0][0] * 100:.2f}%, Normal: {(1 - prediction[0][0]) * 100:.2f}%")
+        # Prediction button
+        if st.button("Predict"):
+            prediction = model.predict(processed_image)
+            result = "TB Positive" if prediction[0][0] > 0.5 else "Normal"
+            st.subheader(f"Prediction: {result}")
+            
+            # Additional information
+            if result == "TB Positive":
+                st.error("The image indicates a high probability of tuberculosis. Please consult a doctor.")
+            else:
+                st.success("The image indicates no signs of tuberculosis.")
+            
+            # Confidence
+            confidence = prediction[0][0] if prediction[0][0] > 0.5 else (1 - prediction[0][0])
+            st.write(f"Model confidence: {confidence * 100:.2f}%")
+            
+            # Show prediction probabilities
+            st.write(f"Prediction probabilities: TB Positive: {prediction[0][0] * 100:.2f}%, Normal: {(1 - prediction[0][0]) * 100:.2f}%")
 
 # Sidebar for additional info
 st.sidebar.title("About PulmoScan AI")
